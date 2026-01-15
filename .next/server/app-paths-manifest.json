@@ -1,0 +1,16 @@
+{
+  "/_not-found": "app/_not-found.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/interests/route": "app/api/interests/route.js",
+  "/auth/signin/page": "app/auth/signin/page.js",
+  "/page": "app/page.js",
+  "/api/sellers/search/route": "app/api/sellers/search/route.js",
+  "/admin/interests/page": "app/admin/interests/page.js",
+  "/admin/reports/page": "app/admin/reports/page.js",
+  "/admin/sellers/page": "app/admin/sellers/page.js",
+  "/admin/notifications/page": "app/admin/notifications/page.js",
+  "/admin/qa/page": "app/admin/qa/page.js",
+  "/admin/shipments/page": "app/admin/shipments/page.js",
+  "/admin/buyers/page": "app/admin/buyers/page.js",
+  "/admin/page": "app/admin/page.js"
+}
