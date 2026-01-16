@@ -15,6 +15,7 @@ const links = [
     { href: "/admin/buyers", label: "Buyers", icon: Users },
     { href: "/admin/notifications", label: "Notifications", icon: Bell },
     { href: "/admin/reports", label: "Reports", icon: FileText },
+    { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function AdminSidebar() {
