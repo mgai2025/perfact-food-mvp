@@ -25,7 +25,7 @@ export async function POST() {
 
         const jwt = new JWT({
             email,
-            key: key.replace(/\\n/g, '\n'),
+            key: key.includes('\\n') ? key.replace(/\\n/g, '\n') : key,
             scopes: ['https://www.googleapis.com/auth/spreadsheets'],
         });
 

@@ -35,7 +35,8 @@ class SheetService {
         try {
             const jwt = new JWT({
                 email,
-                key: key.replace(/\\n/g, '\n'),
+                // Handle both literal \n (from some env setups) and actual newlines
+                key: key.includes('\\n') ? key.replace(/\\n/g, '\n') : key,
                 scopes: ['https://www.googleapis.com/auth/spreadsheets'],
             });
 
