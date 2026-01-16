@@ -52,16 +52,28 @@ class SheetService {
 
     async getRows<T>(sheetTitle: string): Promise<T[]> {
         if (!this.doc) return [];
-        const sheet = this.doc.sheetsByTitle[sheetTitle];
-        if (!sheet) return [];
-        const rows = await sheet.getRows();
-        return rows.map(row => row.toObject()) as T[];
+        try {
+            const sheet = this.doc.sheetsByTitle[sheetTitle];
+            if (!sheet) {
+                console.warn(`Sheet '${sheetTitle}' not found.`);
+                return [];
+            }
+            const rows = await sheet.getRows();
+            return rows.map(row => row.toObject()) as T[];
+        } catch (err: any) {
+            console.error(`Error fetching rows for ${sheetTitle}:`, err.message);
+            return [];
+        }
     }
 
     async addRow(sheetTitle: string, data: any) {
         if (!this.doc) return;
-        const sheet = this.doc.sheetsByTitle[sheetTitle];
-        if (sheet) await sheet.addRow(data);
+        try {
+            const sheet = this.doc.sheetsByTitle[sheetTitle];
+            if (sheet) await sheet.addRow(data);
+        } catch (err) {
+            console.error(`Error adding row to ${sheetTitle}:`, err);
+        }
     }
 }
 
@@ -69,25 +81,29 @@ const sheetService = new SheetService();
 
 // Helper to handle hybrid fetching
 async function fetchOrMock<T>(sheetName: string, mockData: T[]): Promise<T[]> {
-    const connected = await sheetService.init();
-    if (connected) {
-        const rows = await sheetService.getRows<any>(sheetName);
-        // Map fields if necessary, but assuming column names match type keys exactly as per setup-sheets.js
-        // We might need to handle array parsing: 'item1,item2' -> ['item1', 'item2']
-        return rows.map(row => {
-            // Quick cleanup of numeric strings and boolean strings
-            const obj: any = { ...row };
-            // Simple heuristics for parsing types could go here if needed
-            // For now, returning raw object as string-heavy MVP
-            // Specific field parsers:
-            if (obj.productsOffered && typeof obj.productsOffered === 'string') obj.productsOffered = obj.productsOffered.split(',').map((s: string) => s.trim());
-            if (obj.certifications && typeof obj.certifications === 'string') obj.certifications = obj.certifications.split(',').map((s: string) => s.trim());
-            if (obj.pricePerUnit) obj.pricePerUnit = Number(obj.pricePerUnit);
-            if (obj.quantity) obj.quantity = Number(obj.quantity);
-            if (obj.budgetPerUnit) obj.budgetPerUnit = Number(obj.budgetPerUnit);
-            // ... conversions
-            return obj as T;
-        });
+    try {
+        const connected = await sheetService.init();
+        if (connected) {
+            const rows = await sheetService.getRows<any>(sheetName);
+            if (rows.length === 0) return mockData; // Fallback to mock if sheet is empty (optional decision, but helpful for empty new sheets)
+
+            return rows.map(row => {
+                // Quick cleanup of numeric strings and boolean strings
+                const obj: any = { ...row };
+                // Specific field parsers:
+                if (obj.productsOffered && typeof obj.productsOffered === 'string') obj.productsOffered = obj.productsOffered.split(',').map((s: string) => s.trim());
+                if (obj.certifications && typeof obj.certifications === 'string') obj.certifications = obj.certifications.split(',').map((s: string) => s.trim());
+                if (obj.pricePerUnit) obj.pricePerUnit = Number(obj.pricePerUnit) || 0;
+                if (obj.quantity) obj.quantity = Number(obj.quantity) || 0;
+                if (obj.budgetPerUnit) obj.budgetPerUnit = Number(obj.budgetPerUnit) || 0;
+
+                // Ensure IDs exist
+                // if (!obj.sellerId) ...
+                return obj as T;
+            });
+        }
+    } catch (e) {
+        console.error("Global Fetch Error:", e);
     }
     return mockData;
 }
