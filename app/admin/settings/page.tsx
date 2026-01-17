@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertCircle, Check, Database, Loader2 } from "lucide-react";
 
+import { initializeDatabase } from "@/app/actions";
+
 export default function SettingsPage() {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<any>(null);
@@ -13,11 +15,10 @@ export default function SettingsPage() {
         setLoading(true);
         setResult(null);
         try {
-            const res = await fetch('/api/admin/init-db', { method: 'POST' });
-            const data = await res.json();
+            const data = await initializeDatabase();
             setResult(data);
         } catch (e) {
-            setResult({ success: false, error: "Network Error" });
+            setResult({ success: false, error: "Unexpected Error" });
         } finally {
             setLoading(false);
         }
